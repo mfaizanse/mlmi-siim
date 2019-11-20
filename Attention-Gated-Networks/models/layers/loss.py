@@ -75,8 +75,12 @@ class CustomSoftDiceLoss(nn.Module):
 class One_Hot(nn.Module):
     def __init__(self, depth):
         super(One_Hot, self).__init__()
+        self.use_cuda = False
         self.depth = depth
-        self.ones = torch.sparse.torch.eye(depth).cuda()
+        if self.use_cuda:
+            self.ones = torch.sparse.torch.eye(depth).cuda()
+        else:
+            self.ones = torch.sparse.torch.eye(depth)
 
     def forward(self, X_in):
         n_dim = X_in.dim()
@@ -92,11 +96,20 @@ class One_Hot(nn.Module):
 
 if __name__ == '__main__':
     from torch.autograd import Variable
+    use_cuda = False
     depth=3
     batch_size=2
     encoder = One_Hot(depth=depth).forward
-    y = Variable(torch.LongTensor(batch_size, 1, 1, 2 ,2).random_() % depth).cuda()  # 4 classes,1x3x3 img
+    
+    y = Variable(torch.LongTensor(batch_size, 1, 1, 2 ,2).random_() % depth)  # 4 classes,1x3x3 img
+
+    if use_cuda:
+        y = y.cuda()
+
     y_onehot = encoder(y)
-    x = Variable(torch.randn(y_onehot.size()).float()).cuda()
+    x = Variable(torch.randn(y_onehot.size()).float())
+    if use_cuda:
+        x = x.cuda()
+
     dicemetric = SoftDiceLoss(n_classes=depth)
     dicemetric(x,y)

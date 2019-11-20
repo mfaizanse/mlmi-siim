@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["-c", "./configs/config_unet_ct_multi_att_dsv.json"],
+            "args": ["-c", "./configs/config_unet_simm.json"],
             "console": "integratedTerminal"
         }
     ]
