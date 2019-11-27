@@ -28,7 +28,7 @@ class SIMMDataset(Dataset):
         self.encodedMasks = pd.read_csv(mask_csv_file, names=['ImageId', 'EncodedPixels'], index_col='ImageId')
 
         ## Read dataset file names
-        dsFile = root_dir + '/simm_DS_' + split + 'train.csv'
+        dsFile = root_dir + '/simm_DS_' + split + '.csv'
         dsFileData = pd.read_csv(dsFile)
         self.dicomPaths = dsFileData['path'].tolist()
 
@@ -42,7 +42,7 @@ class SIMMDataset(Dataset):
             idx = idx.tolist()
 
         dPath = self.dicomPaths[idx]
-        dicom = pydicom.dcmread(dPath)
+        dicom = pydicom.dcmread('.' + dPath)
         
 #         image = np.zeros((1, im_height, im_width, im_chan), dtype=np.uint8)
 #         image = np.expand_dims(dicom.pixel_array, axis=2)

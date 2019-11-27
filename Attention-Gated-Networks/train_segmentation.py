@@ -9,13 +9,19 @@ from utils.util import json_file_to_pyobj
 from utils.visualiser import Visualiser
 from utils.error_logger import ErrorLogger
 
+import multiprocessing
+multiprocessing.set_start_method('spawn', True)
+
 from models import get_model
 
 def train(arguments):
 
     # Parse input arguments
-    json_filename = arguments.config
-    network_debug = arguments.debug
+    # json_filename = arguments.config
+    # network_debug = arguments.debug
+
+    json_filename = "./configs/config_unet_simm.json"
+    network_debug = 0
 
     # Load options
     json_opts = json_file_to_pyobj(json_filename)
@@ -105,8 +111,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='CNN Seg Training Function')
 
-    parser.add_argument('-c', '--config',  help='training config file', required=True)
-    parser.add_argument('-d', '--debug',   help='returns number of parameters and bp/fp runtime', action='store_true')
+    # parser.add_argument('-c', '--config',  help='training config file', required=True)
+    # parser.add_argument('-d', '--debug',   help='returns number of parameters and bp/fp runtime', action='store_true')
     args = parser.parse_args()
 
     train(args)
