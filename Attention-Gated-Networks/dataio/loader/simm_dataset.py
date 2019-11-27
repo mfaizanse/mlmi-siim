@@ -76,4 +76,7 @@ class SIMMDataset(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        return sample['image'], sample['mask']
+        img = np.expand_dims(sample['image'], axis=0)
+        mk = np.expand_dims(sample['mask'], axis=0)
+
+        return img, mk

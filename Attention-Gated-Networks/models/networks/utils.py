@@ -187,6 +187,27 @@ class UnetGatingSignal3(nn.Module):
         outputs = self.fc1(outputs)
         return outputs
 
+class UnetGridGatingSignal2(nn.Module):
+    def __init__(self, in_size, out_size, ks=1, is_batchnorm=True):
+        super(UnetGridGatingSignal2, self).__init__()
+
+        if is_batchnorm:
+            self.conv1 = nn.Sequential(nn.Conv2d(in_size, out_size, ks),
+                                       nn.BatchNorm2d(out_size),
+                                       nn.ReLU(inplace=True),
+                                       )
+        else:
+            self.conv1 = nn.Sequential(nn.Conv2d(in_size, out_size, ks),
+                                       nn.ReLU(inplace=True),
+                                       )
+
+        # initialise the blocks
+        for m in self.children():
+            init_weights(m, init_type='kaiming')
+
+    def forward(self, inputs):
+        outputs = self.conv1(inputs)
+        return outputs
 
 class UnetGridGatingSignal3(nn.Module):
     def __init__(self, in_size, out_size, kernel_size=(1,1,1), is_batchnorm=True):
@@ -252,6 +273,28 @@ class UnetUp3(nn.Module):
         outputs2 = self.up(inputs2)
         offset = outputs2.size()[2] - inputs1.size()[2]
         padding = 2 * [offset // 2, offset // 2, 0]
+        outputs1 = F.pad(inputs1, padding)
+        return self.conv(torch.cat([outputs1, outputs2], 1))
+
+
+class unetUp2(nn.Module):
+    def __init__(self, in_size, out_size, is_deconv, is_batchnorm=True):
+        super(unetUp2, self).__init__()
+        self.conv = unetConv2(in_size, out_size, is_batchnorm)
+        if is_deconv:
+            self.up = nn.ConvTranspose2d(in_size, out_size, kernel_size=4, stride=2, padding=1)
+        else:
+            self.up = nn.UpsamplingBilinear2d(scale_factor=2)
+
+        # initialise the blocks
+        for m in self.children():
+            if m.__class__.__name__.find('unetConv2') != -1: continue
+            init_weights(m, init_type='kaiming')
+
+    def forward(self, inputs1, inputs2):
+        outputs2 = self.up(inputs2)
+        offset = outputs2.size()[2] - inputs1.size()[2]
+        padding = 2 * [offset // 2, offset // 2]
         outputs1 = F.pad(inputs1, padding)
         return self.conv(torch.cat([outputs1, outputs2], 1))
 
@@ -455,6 +498,15 @@ class UnetDsv3(nn.Module):
     def __init__(self, in_size, out_size, scale_factor):
         super(UnetDsv3, self).__init__()
         self.dsv = nn.Sequential(nn.Conv3d(in_size, out_size, kernel_size=1, stride=1, padding=0),
+                                 nn.Upsample(scale_factor=scale_factor, mode='trilinear'), )
+
+    def forward(self, input):
+        return self.dsv(input)
+
+class UnetDsv2(nn.Module):
+    def __init__(self, in_size, out_size, scale_factor):
+        super(UnetDsv2, self).__init__()
+        self.dsv = nn.Sequential(nn.Conv2d(in_size, out_size, kernel_size=1, stride=1, padding=0),
                                  nn.Upsample(scale_factor=scale_factor, mode='trilinear'), )
 
     def forward(self, input):
