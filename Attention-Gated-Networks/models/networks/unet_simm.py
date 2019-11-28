@@ -15,6 +15,7 @@ class unet_simm(nn.Module):
         self.in_channels = in_channels
         self.is_batchnorm = is_batchnorm
         self.feature_scale = feature_scale
+        self.use_cuda = False
 
         filters = [64, 128, 256, 512, 1024]
         filters = [int(x / self.feature_scale) for x in filters]
@@ -66,6 +67,10 @@ class unet_simm(nn.Module):
                 init_weights(m, init_type='kaiming')
 
     def forward(self, inputs):
+
+        if self.use_cuda == False:
+            inputs = inputs.float()
+
         # Feature Extraction
         conv1 = self.conv1(inputs)
         maxpool1 = self.maxpool1(conv1)

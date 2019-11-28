@@ -32,7 +32,7 @@
     "lr_rate": 1e-4,
     "l2_reg_weight": 1e-6,
     "feature_scale": 4,
-    "gpu_ids": [0],
+    "gpu_ids": [],
     "isTrain": true,
     "checkpoints_dir": "./checkpoints",
     "experiment_name": "experiment_unet_simm",
