@@ -5,6 +5,7 @@ from torch.nn.modules.loss import _Loss
 from torch.autograd import Function, Variable
 
 def cross_entropy_2D(input, target, weight=None, size_average=True):
+    target = target.float()
     n, c, h, w = input.size()
     log_p = F.log_softmax(input, dim=1)
     log_p = log_p.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
@@ -47,6 +48,26 @@ class SoftDiceLoss(nn.Module):
 
         return score
 
+class SIMMSoftDiceLoss(nn.Module):
+    def __init__(self, n_classes):
+        super(SIMMSoftDiceLoss, self).__init__()
+        self.one_hot_encoder = One_Hot(n_classes).forward
+        self.n_classes = n_classes
+
+    def forward(self, input, target):
+        smooth = 0.01
+        batch_size = input.size(0)
+
+        input = F.sigmoid(input).view(batch_size, -1)
+        target = target.contiguous().view(batch_size, -1)
+
+        inter = torch.sum(input * target, 1) + smooth
+        union = torch.sum(input, 1) + torch.sum(target, 1) + smooth
+
+        score = torch.sum(2.0 * inter / union)
+        score = 1.0 - score / (float(batch_size) * float(self.n_classes))
+
+        return score
 
 class CustomSoftDiceLoss(nn.Module):
     def __init__(self, n_classes, class_ids):
@@ -87,7 +108,7 @@ class One_Hot(nn.Module):
         output_size = X_in.size() + torch.Size([self.depth])
         num_element = X_in.numel()
         X_in = X_in.data.long().view(num_element)
-        out = Variable(self.ones.index_select(0, X_in)).view(output_size)
+        out = Variable(self.ones.index_select(2, X_in)).view(output_size)
         return out.permute(0, -1, *range(1, n_dim)).squeeze(dim=2).float()
 
     def __repr__(self):

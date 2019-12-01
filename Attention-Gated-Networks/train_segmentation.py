@@ -16,18 +16,18 @@ from models import get_model
 
 def train(arguments):
 
-    # Parse input arguments
+    #### Parse input arguments
     # json_filename = arguments.config
     # network_debug = arguments.debug
 
     json_filename = "./configs/config_unet_simm.json"
     network_debug = 0
 
-    # Load options
+    #### Load options
     json_opts = json_file_to_pyobj(json_filename)
     train_opts = json_opts.training
 
-    # Architecture type
+    #### Architecture type
     arch_type = train_opts.arch_type
 
     # Setup Dataset and Augmentation
@@ -42,7 +42,7 @@ def train(arguments):
         print('fp time: {0:.3f} sec\tbp time: {1:.3f} sec per sample'.format(*model.get_fp_bp_time()))
         exit()
 
-    # Setup Data Loader
+    #### Setup Data Loader
     # train_dataset = ds_class(ds_path, split='train',      transform=ds_transform['train'], preload_data=train_opts.preloadData)
     # valid_dataset = ds_class(ds_path, split='validation', transform=ds_transform['valid'], preload_data=train_opts.preloadData)
     # test_dataset  = ds_class(ds_path, split='test',       transform=ds_transform['valid'], preload_data=train_opts.preloadData)

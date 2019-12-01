@@ -5,7 +5,7 @@
     "save_epoch_freq": 10,
     "lr_policy": "step",
     "lr_decay_iters": 250,
-    "batchSize": 2,
+    "batchSize": 1,
     "preloadData": true
   },
   "visualisation":{
@@ -28,7 +28,7 @@
     "tensor_dim": "2D",
     "division_factor": 16,
     "input_nc": 1,
-    "output_nc": 4,
+    "output_nc": 1,
     "lr_rate": 1e-4,
     "l2_reg_weight": 1e-6,
     "feature_scale": 4,
@@ -36,7 +36,7 @@
     "isTrain": true,
     "checkpoints_dir": "./checkpoints",
     "experiment_name": "experiment_unet_simm",
-    "criterion": "dice_loss"
+    "criterion": "SIMMSoftDiceLoss"
   }
 }
 

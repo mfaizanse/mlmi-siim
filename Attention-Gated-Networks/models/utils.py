@@ -38,6 +38,8 @@ def get_criterion(opts):
         criterion = SoftDiceLoss(opts.output_nc)
     elif opts.criterion == 'dice_loss_pancreas_only':
         criterion = CustomSoftDiceLoss(opts.output_nc, class_ids=[0, 2])
+    elif opts.criterion == 'SIMMSoftDiceLoss':
+        criterion = SIMMSoftDiceLoss(opts.output_nc)
 
     return criterion
 

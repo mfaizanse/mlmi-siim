@@ -52,9 +52,11 @@ class ModelOpts:
         if hasattr(opts, 'criterion'):              self.criterion = opts.criterion
 
         if hasattr(opts, 'nonlocal_mode'): self.nonlocal_mode = opts.nonlocal_mode
-        if hasattr(opts, 'attention_dsample'): self.attention_dsample = opts.attention_dsample
+        # if hasattr(opts, 'attention_dsample'): self.attention_dsample = opts.attention_dsample
+        self.attention_dsample = (2,2)
         # Classifier
         if hasattr(opts, 'aggregation_mode'): self.aggregation_mode = opts.aggregation_mode
+        j=1
 
 def get_model(json_opts):
 

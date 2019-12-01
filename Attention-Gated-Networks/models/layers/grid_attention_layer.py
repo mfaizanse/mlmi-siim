@@ -166,7 +166,7 @@ class GridAttentionBlock2D(_GridAttentionBlockND):
                                                    inter_channels=inter_channels,
                                                    gating_channels=gating_channels,
                                                    dimension=2, mode=mode,
-                                                   sub_sample_factor=sub_sample_factor,
+                                                   sub_sample_factor=sub_sample_factor
                                                    )
 
 

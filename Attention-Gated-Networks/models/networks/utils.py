@@ -293,10 +293,11 @@ class unetUp2(nn.Module):
 
     def forward(self, inputs1, inputs2):
         outputs2 = self.up(inputs2)
-        offset = outputs2.size()[2] - inputs1.size()[2]
-        padding = 2 * [offset // 2, offset // 2]
+        offset = outputs2.size()[1] - inputs1.size()[1]
+        padding = [0, 0, 0, 0, offset // 2, offset // 2]
         outputs1 = F.pad(inputs1, padding)
-        return self.conv(torch.cat([outputs1, outputs2], 1))
+        cat = torch.cat([outputs1, outputs2], 1)
+        return self.conv(cat)
 
 
 class UnetUp3_CT(nn.Module):
@@ -507,7 +508,7 @@ class UnetDsv2(nn.Module):
     def __init__(self, in_size, out_size, scale_factor):
         super(UnetDsv2, self).__init__()
         self.dsv = nn.Sequential(nn.Conv2d(in_size, out_size, kernel_size=1, stride=1, padding=0),
-                                 nn.Upsample(scale_factor=scale_factor, mode='trilinear'), )
+                                 nn.Upsample(scale_factor=scale_factor, mode='bilinear'), )
 
     def forward(self, input):
         return self.dsv(input)
