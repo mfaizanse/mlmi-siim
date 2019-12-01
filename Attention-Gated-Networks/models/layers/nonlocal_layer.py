@@ -275,7 +275,7 @@ class _NonLocalBlockND(nn.Module):
         y = y.contiguous().view(batch_size, self.inter_channels, *downsampled_size[2:])
 
         # upsample the final featuremaps # (b,0.5c,t/s1,h/s2,w/s3)
-        y = F.upsample(y, size=x.size()[2:], mode='trilinear')
+        y = F.interpolate(y, size=x.size()[2:], mode='trilinear')
 
         # attention block output
         W_y = self.W(y)

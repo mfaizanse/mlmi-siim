@@ -57,9 +57,9 @@ for iteration, (input_arr, input_meta, _) in enumerate(data_loader, 1):
 
     # Display the input image and Down_sample the input image
     orig_input_img = model.input.permute(2, 3, 4, 1, 0).cpu().numpy()
-    upsampled_attention   = F.upsample(out_fmap[1], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
-    upsampled_fmap_before = F.upsample(inp_fmap[0], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
-    upsampled_fmap_after  = F.upsample(out_fmap[2], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
+    upsampled_attention   = F.interpolate(out_fmap[1], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
+    upsampled_fmap_before = F.interpolate(inp_fmap[0], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
+    upsampled_fmap_after  = F.interpolate(out_fmap[2], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
 
     # Define the directories
     save_directory = os.path.join('/vol/bitbucket/oo2113/tmp/feature_maps', layer_name)

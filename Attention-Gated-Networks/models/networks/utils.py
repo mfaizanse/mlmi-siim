@@ -331,7 +331,7 @@ class SqEx(nn.Module):
         self.linear1 = nn.Linear(n_features, n_features // reduction, bias=False)
         self.nonlin1 = nn.ReLU(inplace=True)
         self.linear2 = nn.Linear(n_features // reduction, n_features, bias=False)
-        self.nonlin2 = nn.Sigmoid()
+        self.nonlin2 = torch.Sigmoid()
 
     def forward(self, x):
 

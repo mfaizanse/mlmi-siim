@@ -73,7 +73,7 @@ for epoch in epochs:
 
             # Display the input image and Down_sample the input image
             orig_input_img = model.input.permute(2, 3, 4, 1, 0).cpu().numpy()
-            upsampled_attention = F.upsample(out_fmap[1], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
+            upsampled_attention = F.interpolate(out_fmap[1], size=input_arr.size()[2:], mode='trilinear').data.squeeze().permute(1,2,3,0).cpu().numpy()
 
             # Append it to the list
             int_imgs.append(orig_input_img[:,:,:,0,0])

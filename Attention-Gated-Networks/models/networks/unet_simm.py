@@ -123,9 +123,9 @@ class MultiAttentionBlock(nn.Module):
         self.gate_block_1 = GridAttentionBlock2D(in_channels=in_size, gating_channels=gate_size,
                                                  inter_channels=inter_size, mode=nonlocal_mode,
                                                  sub_sample_factor= sub_sample_factor)
-        self.gate_block_2 = GridAttentionBlock2D(in_channels=in_size, gating_channels=gate_size,
-                                                 inter_channels=inter_size, mode=nonlocal_mode,
-                                                 sub_sample_factor=sub_sample_factor)
+        # self.gate_block_2 = GridAttentionBlock2D(in_channels=in_size, gating_channels=gate_size,
+        #                                          inter_channels=inter_size, mode=nonlocal_mode,
+        #                                          sub_sample_factor=sub_sample_factor)
         self.combine_gates = nn.Sequential(nn.Conv2d(in_size, in_size, kernel_size=1, stride=1, padding=0),
                                            nn.BatchNorm2d(in_size),
                                            nn.ReLU(inplace=True)
