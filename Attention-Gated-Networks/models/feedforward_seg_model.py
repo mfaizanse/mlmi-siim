@@ -129,6 +129,7 @@ class FeedForwardSegmentation(BaseModel):
 
     def get_current_errors(self):
         lossValue = self.loss_S.item()
+        print("loss: " + str(lossValue))
         # self.loss_S.data[0]
         return OrderedDict([('Seg_Loss', lossValue)
                             ])

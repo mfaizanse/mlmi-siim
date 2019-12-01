@@ -1,7 +1,7 @@
 {
   "training":{
     "arch_type": "simm_unet",
-    "n_epochs": 1000,
+    "n_epochs": 5,
     "save_epoch_freq": 10,
     "lr_policy": "step",
     "lr_decay_iters": 250,
@@ -9,7 +9,7 @@
     "preloadData": true
   },
   "visualisation":{
-    "display_port": 8099,
+    "display_port": 8097,
     "no_html": true,
     "display_winsize": 256,
     "display_id": 1,
