@@ -1,20 +1,16 @@
 import numpy
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
-
 from dataio.loader import get_dataset, get_dataset_path
 from dataio.transformation import get_dataset_transformation
 from utils.util import json_file_to_pyobj
 from utils.visualiser import Visualiser
 from utils.error_logger import ErrorLogger
-
 import multiprocessing
 multiprocessing.set_start_method('spawn', True)
-
 from models import get_model
 
-def train(arguments):
+def train():
 
     #### Parse input arguments
     # json_filename = arguments.config
@@ -66,6 +62,7 @@ def train(arguments):
 
         # Training Iterations
         for epoch_iter, (images, labels) in tqdm(enumerate(train_loader, 1), total=len(train_loader)):
+            print('Train: (epoch: %d, epoch_iter %d, # iters: %d)' % (epoch, epoch_iter, len(train_loader)))
             # Make a training update
             model.set_input(images, labels)
             model.optimize_parameters()
@@ -78,6 +75,7 @@ def train(arguments):
         # Validation and Testing Iterations
         for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
             for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+                print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
 
                 # Make a forward pass with the model
                 model.set_input(images, labels)
@@ -107,12 +105,12 @@ def train(arguments):
 
 
 if __name__ == '__main__':
-    import argparse
+    # import argparse
 
-    parser = argparse.ArgumentParser(description='CNN Seg Training Function')
+    # parser = argparse.ArgumentParser(description='CNN Seg Training Function')
 
     # parser.add_argument('-c', '--config',  help='training config file', required=True)
     # parser.add_argument('-d', '--debug',   help='returns number of parameters and bp/fp runtime', action='store_true')
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    train(args)
+    train()

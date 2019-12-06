@@ -1,7 +1,7 @@
 {
   "training":{
     "arch_type": "simm_unet",
-    "n_epochs": 5,
+    "n_epochs": 10,
     "save_epoch_freq": 10,
     "lr_policy": "step",
     "lr_decay_iters": 250,
@@ -10,6 +10,7 @@
   },
   "visualisation":{
     "display_port": 8097,
+    "display_server": "http://54.89.248.230",
     "no_html": true,
     "display_winsize": 256,
     "display_id": 1,
