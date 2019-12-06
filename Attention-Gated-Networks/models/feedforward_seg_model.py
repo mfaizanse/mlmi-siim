@@ -33,6 +33,8 @@ class FeedForwardSegmentation(BaseModel):
                                attention_dsample=opts.attention_dsample)
         if self.use_cuda: self.net = self.net.cuda()
 
+        self.net  = self.net.double()
+
         # load the model if a path is specified or it is in inference mode
         if not self.isTrain or opts.continue_train:
             self.path_pre_trained_model = opts.path_pre_trained_model

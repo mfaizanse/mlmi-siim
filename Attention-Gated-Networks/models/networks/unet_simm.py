@@ -71,7 +71,8 @@ class unet_simm(nn.Module):
     def forward(self, inputs):
 
         if self.use_cuda == False:
-            inputs = inputs.float()
+            # inputs = inputs.to(dtype=torch.float64)
+            inputs = inputs.double()
 
         # Feature Extraction
         conv1 = self.conv1(inputs)
