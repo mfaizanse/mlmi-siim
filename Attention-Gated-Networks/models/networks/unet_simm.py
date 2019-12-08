@@ -4,7 +4,7 @@ from .utils import unetConv2, UnetConv3, UnetUp3_CT, unetUp2, UnetGridGatingSign
 import torch.nn.functional as F
 from models.networks_other import init_weights
 from models.layers.grid_attention_layer import GridAttentionBlock3D, GridAttentionBlock2D
-
+from config import Config
 
 class unet_simm(nn.Module):
 
@@ -15,7 +15,7 @@ class unet_simm(nn.Module):
         self.in_channels = in_channels
         self.is_batchnorm = is_batchnorm
         self.feature_scale = feature_scale
-        self.use_cuda = False
+        self.use_cuda = Config.use_cuda
 
         filters = [64, 128, 256, 512, 1024]
         filters = [int(x / self.feature_scale) for x in filters]
@@ -70,9 +70,11 @@ class unet_simm(nn.Module):
 
     def forward(self, inputs):
 
-        if self.use_cuda == False:
-            # inputs = inputs.to(dtype=torch.float64)
-            inputs = inputs.double()
+        # if self.use_cuda == False:
+        #     # inputs = inputs.to(dtype=torch.float64)
+        #     inputs = inputs.double()
+
+        inputs = inputs.double()
 
         # Feature Extraction
         conv1 = self.conv1(inputs)

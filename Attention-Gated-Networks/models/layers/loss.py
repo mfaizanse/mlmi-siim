@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.loss import _Loss
 from torch.autograd import Function, Variable
+from config import Config
 
 def cross_entropy_2D(input, target, weight=None, size_average=True):
     target = target.float()
@@ -96,7 +97,7 @@ class CustomSoftDiceLoss(nn.Module):
 class One_Hot(nn.Module):
     def __init__(self, depth):
         super(One_Hot, self).__init__()
-        self.use_cuda = False
+        self.use_cuda = Config.use_cuda
         self.depth = depth
         if self.use_cuda:
             self.ones = torch.sparse.torch.eye(depth).cuda()

@@ -3,13 +3,14 @@ import numpy
 import torch
 from utils.util import mkdir
 from .networks_other import get_n_parameters
+from config import Config
 
 class BaseModel():
     def __init__(self):
         self.input = None
         self.net = None
         self.isTrain = False
-        self.use_cuda = False
+        self.use_cuda = Config.use_cuda
         self.schedulers = []
         self.optimizers = []
         self.save_dir = None
