@@ -9,6 +9,7 @@ from utils.error_logger import ErrorLogger
 import multiprocessing
 multiprocessing.set_start_method('spawn', True)
 from models import get_model
+from config import Config
 
 def train():
 
@@ -22,6 +23,9 @@ def train():
     #### Load options
     json_opts = json_file_to_pyobj(json_filename)
     train_opts = json_opts.training
+
+    #### use GPU or not
+    Config.use_cuda = False
 
     #### Architecture type
     arch_type = train_opts.arch_type
@@ -47,9 +51,10 @@ def train():
     valid_dataset = ds_class(ds_path, split='validation', transform=None, preload_data=train_opts.preloadData)
     test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
     
-    train_loader = DataLoader(dataset=train_dataset, num_workers=16, batch_size=train_opts.batchSize, shuffle=True)
-    valid_loader = DataLoader(dataset=valid_dataset, num_workers=16, batch_size=train_opts.batchSize, shuffle=False)
-    test_loader  = DataLoader(dataset=test_dataset,  num_workers=16, batch_size=train_opts.batchSize, shuffle=False)
+    numWorkers = 0
+    train_loader = DataLoader(dataset=train_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=True)
+    valid_loader = DataLoader(dataset=valid_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
+    test_loader  = DataLoader(dataset=test_dataset,  num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
 
     # Visualisation Parameters
     visualizer = Visualiser(json_opts.visualisation, save_dir=model.save_dir)
