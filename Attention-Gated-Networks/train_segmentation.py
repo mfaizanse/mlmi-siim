@@ -67,6 +67,8 @@ def train(json_opts):
             visuals = model.get_current_visuals()
             visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
 
+            visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+
         # Validation and Testing Iterations
         # for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
         #     for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
