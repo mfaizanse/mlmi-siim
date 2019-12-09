@@ -60,6 +60,11 @@ class FeedForwardSegmentation(BaseModel):
                 print('Network is initialized')
                 print_network(self.net)
 
+    def hard_classification(self, input):
+        input = input >= 0.5
+        input = input.double()
+        return input
+
     def set_scheduler(self, train_opt):
         for optimizer in self.optimizers:
             self.schedulers.append(get_scheduler(optimizer, train_opt))
@@ -83,11 +88,14 @@ class FeedForwardSegmentation(BaseModel):
     def forward(self, split):
         if split == 'train':
             self.prediction = self.net(Variable(self.input))
+            self.hard_prediction = self.hard_classification(self.prediction)
         elif split == 'test':
-            self.prediction = self.net(Variable(self.input, volatile=True))
-            # Apply a softmax and return a segmentation map
-            self.logits = self.net.apply_argmax_softmax(self.prediction)
-            self.pred_seg = self.logits.data.max(1)[1].unsqueeze(1)
+            with torch.no_grad():
+                self.prediction = self.net(Variable(self.input))
+                self.hard_prediction = self.hard_classification(self.prediction)
+                # Apply a softmax and return a segmentation map
+                self.logits = self.net.apply_argmax_softmax(self.prediction)
+                self.pred_seg = self.logits.data.max(1)[1].unsqueeze(1)
             
     def backward(self):
         self.loss_S = self.criterion(self.prediction, self.target)
@@ -131,14 +139,15 @@ class FeedForwardSegmentation(BaseModel):
 
     def get_current_errors(self):
         lossValue = self.loss_S.item()
-        print("loss: " + str(lossValue))
         # self.loss_S.data[0]
-        return OrderedDict([('Seg_Loss', lossValue)
-                            ])
+        return OrderedDict([
+            ('Seg_Loss', lossValue)
+        ])
 
     def get_current_visuals(self):
         inp_img = util.tensor2im(self.input, 'img')
-        seg_img = util.tensor2im(self.pred_seg, 'lbl')
+        # seg_img = util.tensor2im(self.pred_seg, 'lbl')
+        seg_img = util.tensor2im(self.hard_prediction, 'lbl')
         return OrderedDict([('out_S', seg_img), ('inp_S', inp_img)])
 
     def get_feature_maps(self, layer_name, upscale):

@@ -110,6 +110,8 @@ class unet_simm(nn.Module):
         dsv1 = self.dsv1(up1)
         final = self.final(torch.cat([dsv1,dsv2,dsv3,dsv4], dim=1))
 
+        final = torch.sigmoid(final)
+
         return final
 
 

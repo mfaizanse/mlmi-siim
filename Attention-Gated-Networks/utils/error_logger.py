@@ -74,7 +74,6 @@ class ErrorLogger(object):
                           }
 
     def update(self, input_dict, split):
-
         for key, value in input_dict.items():
             if key not in self.variables[split]:
                 if np.isscalar(value):

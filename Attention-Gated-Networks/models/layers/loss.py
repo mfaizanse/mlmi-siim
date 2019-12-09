@@ -59,7 +59,8 @@ class SIMMSoftDiceLoss(nn.Module):
         smooth = 0.01
         batch_size = input.size(0)
 
-        input = torch.sigmoid(input).view(batch_size, -1)
+        # input = torch.sigmoid(input).view(batch_size, -1)
+        input = input.view(batch_size, -1)
         target = target.contiguous().view(batch_size, -1)
 
         inter = torch.sum(input * target, 1) + smooth
@@ -67,7 +68,7 @@ class SIMMSoftDiceLoss(nn.Module):
 
         score = torch.sum(2.0 * inter / union, 0)
         score = 1.0 - score / (float(batch_size) * float(self.n_classes))
-
+        
         return score
 
 class CustomSoftDiceLoss(nn.Module):

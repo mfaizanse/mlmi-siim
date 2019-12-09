@@ -11,23 +11,9 @@ multiprocessing.set_start_method('spawn', True)
 from models import get_model
 from config import Config
 
-def train():
-
-    #### Parse input arguments
-    # json_filename = arguments.config
-    # network_debug = arguments.debug
-
-    json_filename = "./configs/config_unet_simm.json"
-    network_debug = 0
-
-    #### Load options
-    json_opts = json_file_to_pyobj(json_filename)
+def train(json_opts):
     train_opts = json_opts.training
-
-    #### use GPU or not
-    Config.use_cuda = False
-
-    #### Architecture type
+    Config.use_cuda = json_opts.use_cuda
     arch_type = train_opts.arch_type
 
     # Setup Dataset and Augmentation
@@ -37,7 +23,7 @@ def train():
 
     # Setup the NN Model
     model = get_model(json_opts.model)
-    if network_debug:
+    if json_opts.network_debug:
         print('# of pars: ', model.get_number_parameters())
         print('fp time: {0:.3f} sec\tbp time: {1:.3f} sec per sample'.format(*model.get_fp_bp_time()))
         exit()
@@ -50,7 +36,7 @@ def train():
     train_dataset = ds_class(ds_path, split='train',      transform=None, preload_data=train_opts.preloadData)
     valid_dataset = ds_class(ds_path, split='validation', transform=None, preload_data=train_opts.preloadData)
     test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
-    
+
     numWorkers = 0
     train_loader = DataLoader(dataset=train_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=True)
     valid_loader = DataLoader(dataset=valid_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
@@ -63,47 +49,51 @@ def train():
     # Training Function
     model.set_scheduler(train_opts)
     for epoch in range(model.which_epoch, train_opts.n_epochs):
-        print('(epoch: %d, total # iters: %d)' % (epoch, len(train_loader)))
-
+        print('############# Running epoch: %d...\n' % (epoch))
         # Training Iterations
         for epoch_iter, (images, labels) in tqdm(enumerate(train_loader, 1), total=len(train_loader)):
-            print('Train: (epoch: %d, epoch_iter %d, # iters: %d)' % (epoch, epoch_iter, len(train_loader)))
             # Make a training update
             model.set_input(images, labels)
             model.optimize_parameters()
-            #model.optimize_parameters_accumulate_grd(epoch_iter)
+            
+            # model.optimize_parameters_accumulate_grd(epoch_iter)
 
             # Error visualisation
             errors = model.get_current_errors()
             error_logger.update(errors, split='train')
 
+            print('Training loss at iter %d, epoch %d: %f \n' % (epoch_iter, epoch, errors['Seg_Loss']))
+
+            visuals = model.get_current_visuals()
+            visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+
         # Validation and Testing Iterations
-        for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
-            for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
-                print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
+        # for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
+        #     for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+        #         print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
 
-                # Make a forward pass with the model
-                model.set_input(images, labels)
-                model.validate()
+        #         # Make a forward pass with the model
+        #         model.set_input(images, labels)
+        #         model.validate()
 
-                # Error visualisation
-                errors = model.get_current_errors()
-                stats = model.get_segmentation_stats()
-                error_logger.update({**errors, **stats}, split=split)
+        #         # Error visualisation
+        #         errors = model.get_current_errors()
+        #         stats = model.get_segmentation_stats()
+        #         error_logger.update({**errors, **stats}, split=split)
 
-                # Visualise predictions
-                visuals = model.get_current_visuals()
-                visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+        #         # Visualise predictions
+        #         visuals = model.get_current_visuals()
+        #         visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
 
-        # Update the plots
-        for split in ['train', 'validation', 'test']:
-            visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
-            visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
-        error_logger.reset()
+        # # Update the plots
+        # for split in ['train', 'validation', 'test']:
+        #     visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        #     visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        # error_logger.reset()
 
-        # Save the model parameters
-        if epoch % train_opts.save_epoch_freq == 0:
-            model.save(epoch)
+        # # Save the model parameters
+        # if epoch % train_opts.save_epoch_freq == 0:
+        #     model.save(epoch)
 
         # Update the model learning rate
         model.update_learning_rate()
@@ -111,11 +101,12 @@ def train():
 
 if __name__ == '__main__':
     # import argparse
-
     # parser = argparse.ArgumentParser(description='CNN Seg Training Function')
-
     # parser.add_argument('-c', '--config',  help='training config file', required=True)
     # parser.add_argument('-d', '--debug',   help='returns number of parameters and bp/fp runtime', action='store_true')
     # args = parser.parse_args()
 
-    train()
+    json_filename = "./configs/config_unet_simm.json"
+    json_opts = json_file_to_pyobj(json_filename)
+
+    train(json_opts)

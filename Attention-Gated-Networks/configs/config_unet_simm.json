@@ -1,11 +1,13 @@
 {
+  "use_cuda": false,
+  "network_debug": 0,
   "training":{
     "arch_type": "simm_unet",
-    "n_epochs": 10,
+    "n_epochs": 30,
     "save_epoch_freq": 10,
     "lr_policy": "step",
     "lr_decay_iters": 250,
-    "batchSize": 1,
+    "batchSize": 3,
     "preloadData": true
   },
   "visualisation":{
@@ -30,7 +32,7 @@
     "division_factor": 16,
     "input_nc": 1,
     "output_nc": 1,
-    "lr_rate": 1e-4,
+    "lr_rate": 1e-3,
     "l2_reg_weight": 1e-6,
     "feature_scale": 4,
     "gpu_ids": [],

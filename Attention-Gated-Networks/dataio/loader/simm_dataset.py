@@ -70,6 +70,10 @@ class SIMMDataset(Dataset):
         ## QUESTION: SHOULD WE TRANSPOSE THE MASK IN THE GETITEM FUNCTION 
         ## BECAUSE WHEN PLOTING THE GRAPHS WE HAVE TO TRANSPOSE IT.
         landmarks = landmarks.T
+
+        # for some images, we have multiple masks, so we are adding the masks
+        # which results in some pixels to > 1
+        landmarks = (landmarks >= 1).astype('float64')
             
         sample = {'image': image, 'mask': landmarks}
 
