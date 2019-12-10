@@ -145,9 +145,10 @@ class FeedForwardSegmentation(BaseModel):
         ])
 
     def get_current_visuals(self):
-        inp_img = util.tensor2im(self.input, 'img')
+        # inp_img = util.tensor2im(self.input, 'img')
         # seg_img = util.tensor2im(self.pred_seg, 'lbl')
         seg_img = util.tensor2im(self.hard_prediction, 'lbl')
+        inp_img = util.tensor2im(self.target, 'lbl')
         return OrderedDict([('out_S', seg_img), ('inp_S', inp_img)])
 
     def get_feature_maps(self, layer_name, upscale):
