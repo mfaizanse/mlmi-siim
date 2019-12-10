@@ -19,6 +19,8 @@ class SIMMDataset(Dataset):
                 on a sample.
         """
 
+        self.root_dir = root_dir
+
         self.im_height = 1024
         self.im_width = 1024
         self.im_chan = 1
@@ -42,7 +44,7 @@ class SIMMDataset(Dataset):
             idx = idx.tolist()
 
         dPath = self.dicomPaths[idx]
-        dicom = pydicom.dcmread('.' + dPath)
+        dicom = pydicom.dcmread(self.root_dir + '/../.' + dPath)
         
 #         image = np.zeros((1, im_height, im_width, im_chan), dtype=np.uint8)
 #         image = np.expand_dims(dicom.pixel_array, axis=2)
