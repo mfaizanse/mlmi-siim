@@ -13,6 +13,7 @@ from .layers.loss import *
 def get_optimizer(option, params):
     opt_alg = 'sgd' if not hasattr(option, 'optim') else option.optim
     if opt_alg == 'sgd':
+        print("Using SGD as optimizer...")
         optimizer = optim.SGD(params,
                               lr=option.lr_rate,
                               momentum=0.9,
@@ -20,6 +21,7 @@ def get_optimizer(option, params):
                               weight_decay=option.l2_reg_weight)
 
     if opt_alg == 'adam':
+        print("Using ADAM as optimizer...")
         optimizer = optim.Adam(params,
                                lr=option.lr_rate,
                                betas=(0.9, 0.999),

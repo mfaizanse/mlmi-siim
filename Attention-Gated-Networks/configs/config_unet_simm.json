@@ -19,7 +19,7 @@
     "display_single_pane_ncols": 0
   },
   "data_path": {
-    "simm_unet": "../input/siim"
+    "simm_unet": "/Users/faizi/git/mlmi/input/siim"
   },
   "augmentation": {
   },
@@ -39,7 +39,8 @@
     "isTrain": true,
     "checkpoints_dir": "./checkpoints",
     "experiment_name": "experiment_unet_simm",
-    "criterion": "SIMMSoftDiceLoss"
+    "criterion": "SIMMSoftDiceLoss",
+    "optim": "adam"
   }
 }
 
