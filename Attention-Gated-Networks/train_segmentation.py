@@ -13,7 +13,7 @@ from config import Config
 import torch
 
 def train(json_opts):
-    print("Run 1:08")
+    print("Run 1:32")
     train_opts = json_opts.training
     Config.use_cuda = json_opts.use_cuda
     arch_type = train_opts.arch_type
@@ -73,7 +73,8 @@ def train(json_opts):
             # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
             ## ('seg_pred', target_img), ('seg_target', input_img)
             visualizer.display_image(visuals['vis_img'], 'training_prediction', 'train_pred')
-            visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
+            
+            # visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
 
             if Config.use_cuda:
                 model.delete_tensors()
