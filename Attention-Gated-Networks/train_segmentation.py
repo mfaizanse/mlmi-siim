@@ -1,0 +1,148 @@
+import numpy
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from dataio.loader import get_dataset, get_dataset_path
+from dataio.transformation import get_dataset_transformation
+from utils.util import json_file_to_pyobj
+from utils.visualiser import Visualiser
+from utils.error_logger import ErrorLogger
+import multiprocessing
+multiprocessing.set_start_method('spawn', True)
+from models import get_model
+from config import Config
+import torch
+
+def train(json_opts):
+    print("Run 1:32")
+    train_opts = json_opts.training
+    Config.use_cuda = json_opts.use_cuda
+    arch_type = train_opts.arch_type
+
+    # Setup Dataset and Augmentation
+    ds_class = get_dataset(arch_type)
+    ds_path  = get_dataset_path(arch_type, json_opts.data_path)
+    # ds_transform = get_dataset_transformation(arch_type, opts=json_opts.augmentation)
+
+    # Setup the NN Model
+    model = get_model(json_opts.model)
+    if json_opts.network_debug:
+        print('# of pars: ', model.get_number_parameters())
+        print('fp time: {0:.3f} sec\tbp time: {1:.3f} sec per sample'.format(*model.get_fp_bp_time()))
+        exit()
+
+    #### Setup Data Loader
+    # train_dataset = ds_class(ds_path, split='train',      transform=ds_transform['train'], preload_data=train_opts.preloadData)
+    # valid_dataset = ds_class(ds_path, split='validation', transform=ds_transform['valid'], preload_data=train_opts.preloadData)
+    # test_dataset  = ds_class(ds_path, split='test',       transform=ds_transform['valid'], preload_data=train_opts.preloadData)
+
+    train_dataset = ds_class(ds_path, split='train',      transform=None, preload_data=train_opts.preloadData)
+    valid_dataset = ds_class(ds_path, split='validation', transform=None, preload_data=train_opts.preloadData)
+    # test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
+
+    numWorkers = 0
+    train_loader = DataLoader(dataset=train_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=True)
+    valid_loader = DataLoader(dataset=valid_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
+    # test_loader  = DataLoader(dataset=test_dataset,  num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
+
+    # Visualisation Parameters
+    visualizer = Visualiser(json_opts.visualisation, save_dir=model.save_dir)
+    error_logger = ErrorLogger()
+
+    if Config.use_cuda:
+        torch.cuda.empty_cache()
+
+    # Training Function
+    model.set_scheduler(train_opts)
+    for epoch in range(model.which_epoch, train_opts.n_epochs):
+        print('############# Running epoch: %d...\n' % (epoch))
+        # Training Iterations
+        for epoch_iter, (images, labels) in tqdm(enumerate(train_loader, 1), total=len(train_loader)):
+            # Make a training update
+            model.set_input(images, labels)
+            model.optimize_parameters()
+            
+            # model.optimize_parameters_accumulate_grd(epoch_iter)
+
+            # Error visualisation
+            errors = model.get_current_errors()
+            error_logger.update(errors, split='train')
+
+            print('Training loss at iter %d, epoch %d: %f \n' % (epoch_iter, epoch, errors['Seg_Loss']))
+
+            visuals = model.get_current_visuals_train()
+            # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+            ## ('seg_pred', target_img), ('seg_target', input_img)
+            visualizer.display_image(visuals['vis_img'], 'training_prediction', 'train_pred')
+            
+            # visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
+
+            if Config.use_cuda:
+                model.delete_tensors()
+                torch.cuda.empty_cache()
+
+        for loader, split in zip([valid_loader], ['validation']):
+            for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+                print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
+
+                # Make a forward pass with the model
+                model.set_input(images, labels)
+                model.validate()
+
+                # Error visualisation
+                errors = model.get_current_errors()
+                stats = model.get_segmentation_stats()
+                error_logger.update({**errors, **stats}, split=split)
+
+                # Visualise predictions
+                # visuals = model.get_current_visuals()
+                # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+
+        # Update the plots
+        for split in ['train', 'validation']:
+            visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+            visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        error_logger.reset()
+
+        ## Validation and Testing Iterations
+        # for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
+        #     for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+        #         print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
+
+        #         # Make a forward pass with the model
+        #         model.set_input(images, labels)
+        #         model.validate()
+
+        #         # Error visualisation
+        #         errors = model.get_current_errors()
+        #         stats = model.get_segmentation_stats()
+        #         error_logger.update({**errors, **stats}, split=split)
+
+        #         # Visualise predictions
+        #         visuals = model.get_current_visuals()
+        #         visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+
+        # # Update the plots
+        # for split in ['train', 'validation', 'test']:
+        #     visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        #     visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        # error_logger.reset()
+
+        # # Save the model parameters
+        # if epoch % train_opts.save_epoch_freq == 0:
+        #     model.save(epoch)
+
+        # Update the model learning rate
+        model.update_learning_rate()
+
+
+if __name__ == '__main__':
+    # import argparse
+    # parser = argparse.ArgumentParser(description='CNN Seg Training Function')
+    # parser.add_argument('-c', '--config',  help='training config file', required=True)
+    # parser.add_argument('-d', '--debug',   help='returns number of parameters and bp/fp runtime', action='store_true')
+    # args = parser.parse_args()
+
+    json_filename = "./configs/config_unet_simm.json"
+    json_opts = json_file_to_pyobj(json_filename)
+
+    train(json_opts)
