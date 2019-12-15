@@ -197,3 +197,10 @@ class Visualiser():
             txts.append(label)
             links.append(image_name)
         webpage.add_images(ims, txts, links, width=self.win_size)
+
+    def display_image(self, img, window, title):
+        self.vis.image(
+            img,
+            win=window,
+            opts=dict(caption=title, store_history=False, title=title),
+        )

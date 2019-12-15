@@ -85,4 +85,6 @@ class SIMMDataset(Dataset):
         img = np.expand_dims(sample['image'], axis=0)
         mk = np.expand_dims(sample['mask'], axis=0)
 
+        img = img / 255
+
         return img, mk

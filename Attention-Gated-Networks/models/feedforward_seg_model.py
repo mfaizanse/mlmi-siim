@@ -1,7 +1,7 @@
 import torch
 from torch.autograd import Variable
 import torch.optim as optim
-
+import numpy as np
 from collections import OrderedDict
 import utils.util as util
 from .base_model import BaseModel
@@ -149,7 +149,31 @@ class FeedForwardSegmentation(BaseModel):
         # seg_img = util.tensor2im(self.pred_seg, 'lbl')
         seg_img = util.tensor2im(self.hard_prediction, 'lbl')
         inp_img = util.tensor2im(self.target, 'lbl')
+
         return OrderedDict([('out_S', seg_img), ('inp_S', inp_img)])
+
+    def get_current_visuals_train(self):
+        # inp_img = util.tensor2im(self.input, 'img')
+        # seg_img = util.tensor2im(self.pred_seg, 'lbl')
+        seg_img = self.hard_prediction[0]
+        target_img = self.target[0]
+
+        input_img = self.input[0]
+
+        seg_pred = input_img.clone()
+        seg_pred = seg_pred * 255
+        seg_pred[seg_img == 1] = 255
+
+        seg_target = input_img.clone()
+        seg_target = seg_target * 255
+        seg_target[target_img == 1] = 255
+
+        # alpha = 0.2
+        # seg_pred = input_img * alpha + seg_img * (1-alpha)
+        # seg_target = input_img * alpha + target_img * (1-alpha)
+
+        return OrderedDict([('seg_pred', seg_pred), ('seg_target', seg_target)])
+
 
     def get_feature_maps(self, layer_name, upscale):
         feature_extractor = HookBasedFeatureExtractor(self.net, layer_name, upscale)

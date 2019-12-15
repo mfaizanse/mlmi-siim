@@ -64,12 +64,38 @@ def train(json_opts):
 
             print('Training loss at iter %d, epoch %d: %f \n' % (epoch_iter, epoch, errors['Seg_Loss']))
 
-            visuals = model.get_current_visuals()
-            visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+            visuals = model.get_current_visuals_train()
+            # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+            ## ('seg_pred', target_img), ('seg_target', input_img)
+            visualizer.display_image(visuals['seg_pred'], 'training_prediction', 'train_pred')
+            visualizer.display_image(visuals['seg_target'], 'training_target', 'train_target')
 
             visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
 
-        # Validation and Testing Iterations
+        for loader, split in zip([valid_loader], ['validation']):
+            for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+                print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
+
+                # Make a forward pass with the model
+                model.set_input(images, labels)
+                model.validate()
+
+                # Error visualisation
+                errors = model.get_current_errors()
+                stats = model.get_segmentation_stats()
+                error_logger.update({**errors, **stats}, split=split)
+
+                # Visualise predictions
+                # visuals = model.get_current_visuals()
+                # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+
+        # Update the plots
+        for split in ['train', 'validation']:
+            visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+            visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
+        error_logger.reset()
+
+        ## Validation and Testing Iterations
         # for loader, split in zip([valid_loader, test_loader], ['validation', 'test']):
         #     for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
         #         print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
