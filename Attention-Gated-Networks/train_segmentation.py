@@ -21,6 +21,7 @@ def train(json_opts):
     # Setup Dataset and Augmentation
     ds_class = get_dataset(arch_type)
     ds_path  = get_dataset_path(arch_type, json_opts.data_path)
+    ds_postfix = json_opts.data_path.postfix
     # ds_transform = get_dataset_transformation(arch_type, opts=json_opts.augmentation)
 
     # Setup the NN Model
@@ -35,8 +36,8 @@ def train(json_opts):
     # valid_dataset = ds_class(ds_path, split='validation', transform=ds_transform['valid'], preload_data=train_opts.preloadData)
     # test_dataset  = ds_class(ds_path, split='test',       transform=ds_transform['valid'], preload_data=train_opts.preloadData)
 
-    train_dataset = ds_class(ds_path, split='train',      transform=None, preload_data=train_opts.preloadData)
-    valid_dataset = ds_class(ds_path, split='validation', transform=None, preload_data=train_opts.preloadData)
+    train_dataset = ds_class(ds_path, ds_postfix, split='train',      transform=None, preload_data=train_opts.preloadData)
+    valid_dataset = ds_class(ds_path, ds_postfix, split='validation', transform=None, preload_data=train_opts.preloadData)
     # test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
 
     numWorkers = 0

@@ -10,7 +10,7 @@ import numpy as np
 class SIMMDataset(Dataset):
     """SIMM dataset."""
 
-    def __init__(self, root_dir, split, transform=None, preload_data=False):
+    def __init__(self, root_dir, dir_postfix, split, transform=None, preload_data=False):
         """
         Args:
             dicomPaths (Array<string>): Array of DICOM file Paths.
@@ -20,6 +20,7 @@ class SIMMDataset(Dataset):
         """
 
         self.root_dir = root_dir
+        self.dir_postfix = dir_postfix
 
         self.im_height = 1024
         self.im_width = 1024
@@ -44,7 +45,7 @@ class SIMMDataset(Dataset):
             idx = idx.tolist()
 
         dPath = self.dicomPaths[idx]
-        dicom = pydicom.dcmread(self.root_dir + '/../.' + dPath)
+        dicom = pydicom.dcmread(self.root_dir + self.dir_postfix + dPath)
         
 #         image = np.zeros((1, im_height, im_width, im_chan), dtype=np.uint8)
 #         image = np.expand_dims(dicom.pixel_array, axis=2)
