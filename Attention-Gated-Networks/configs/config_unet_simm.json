@@ -7,7 +7,7 @@
     "save_epoch_freq": 10,
     "lr_policy": "step",
     "lr_decay_iters": 250,
-    "batchSize": 3,
+    "batchSize": 2,
     "preloadData": true
   },
   "visualisation":{

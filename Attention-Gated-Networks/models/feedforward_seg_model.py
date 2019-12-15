@@ -60,6 +60,12 @@ class FeedForwardSegmentation(BaseModel):
                 print('Network is initialized')
                 print_network(self.net)
 
+    def delete_tensors(self):
+        del self.input
+        del self.target
+        del self.prediction
+        del self.hard_prediction
+
     def hard_classification(self, input):
         input = input >= 0.5
         input = input.double()
@@ -158,21 +164,51 @@ class FeedForwardSegmentation(BaseModel):
         seg_img = self.hard_prediction[0]
         target_img = self.target[0]
 
-        input_img = self.input[0]
+        visual_img = self.input[0].clone()
+        visual_img = visual_img * 255
+        visual_img[seg_img == 1] = 200
+        visual_img[target_img == 1] = 255
 
-        seg_pred = input_img.clone()
-        seg_pred = seg_pred * 255
-        seg_pred[seg_img == 1] = 255
+        # seg_pred = input_img.clone()
+        # seg_pred = seg_pred * 255
+        # seg_pred[seg_img == 1] = 255
 
-        seg_target = input_img.clone()
-        seg_target = seg_target * 255
-        seg_target[target_img == 1] = 255
+        # seg_target = input_img.clone()
+        # seg_target = seg_target * 255
+        # seg_target[target_img == 1] = 255
 
         # alpha = 0.2
         # seg_pred = input_img * alpha + seg_img * (1-alpha)
         # seg_target = input_img * alpha + target_img * (1-alpha)
 
-        return OrderedDict([('seg_pred', seg_pred), ('seg_target', seg_target)])
+        # return OrderedDict([('seg_pred', seg_pred), ('seg_target', seg_target)])
+        return OrderedDict([('vis_img', visual_img)])
+
+    def get_current_visuals_single(self):
+        # inp_img = util.tensor2im(self.input, 'img')
+        # seg_img = util.tensor2im(self.pred_seg, 'lbl')
+        seg_img = self.hard_prediction[0]
+        target_img = self.target[0]
+
+        visual_img = self.input[0].clone()
+        visual_img = visual_img * 255
+        visual_img[seg_img == 1] = 200
+        visual_img[target_img == 1] = 255
+
+        # seg_pred = input_img.clone()
+        # seg_pred = seg_pred * 255
+        # seg_pred[seg_img == 1] = 255
+
+        # seg_target = input_img.clone()
+        # seg_target = seg_target * 255
+        # seg_target[target_img == 1] = 255
+
+        # alpha = 0.2
+        # seg_pred = input_img * alpha + seg_img * (1-alpha)
+        # seg_target = input_img * alpha + target_img * (1-alpha)
+
+        # return OrderedDict([('seg_pred', seg_pred), ('seg_target', seg_target)])
+        return OrderedDict([('vis_img', visual_img)])
 
 
     def get_feature_maps(self, layer_name, upscale):

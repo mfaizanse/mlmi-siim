@@ -10,8 +10,10 @@ import multiprocessing
 multiprocessing.set_start_method('spawn', True)
 from models import get_model
 from config import Config
+import torch
 
 def train(json_opts):
+    print("Run 1:08")
     train_opts = json_opts.training
     Config.use_cuda = json_opts.use_cuda
     arch_type = train_opts.arch_type
@@ -35,16 +37,19 @@ def train(json_opts):
 
     train_dataset = ds_class(ds_path, split='train',      transform=None, preload_data=train_opts.preloadData)
     valid_dataset = ds_class(ds_path, split='validation', transform=None, preload_data=train_opts.preloadData)
-    test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
+    # test_dataset  = ds_class(ds_path, split='test',       transform=None, preload_data=train_opts.preloadData)
 
     numWorkers = 0
     train_loader = DataLoader(dataset=train_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=True)
     valid_loader = DataLoader(dataset=valid_dataset, num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
-    test_loader  = DataLoader(dataset=test_dataset,  num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
+    # test_loader  = DataLoader(dataset=test_dataset,  num_workers=numWorkers, batch_size=train_opts.batchSize, shuffle=False)
 
     # Visualisation Parameters
     visualizer = Visualiser(json_opts.visualisation, save_dir=model.save_dir)
     error_logger = ErrorLogger()
+
+    if Config.use_cuda:
+        torch.cuda.empty_cache()
 
     # Training Function
     model.set_scheduler(train_opts)
@@ -67,10 +72,12 @@ def train(json_opts):
             visuals = model.get_current_visuals_train()
             # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
             ## ('seg_pred', target_img), ('seg_target', input_img)
-            visualizer.display_image(visuals['seg_pred'], 'training_prediction', 'train_pred')
-            visualizer.display_image(visuals['seg_target'], 'training_target', 'train_target')
-
+            visualizer.display_image(visuals['vis_img'], 'training_prediction', 'train_pred')
             visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
+
+            if Config.use_cuda:
+                model.delete_tensors()
+                torch.cuda.empty_cache()
 
         for loader, split in zip([valid_loader], ['validation']):
             for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
