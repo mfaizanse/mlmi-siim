@@ -46,11 +46,11 @@ class unet_simm(nn.Module):
                                                    nonlocal_mode=nonlocal_mode, sub_sample_factor= attention_dsample)
 
         # upsampling
-        self.up_concat4 = unetUp2(filters[4]*2, filters[3], False, is_batchnorm)
+        self.up_concat4 = unetUp2(filters[4], filters[3], False, is_batchnorm)
         # self.up_concat4 = unetUp2(512, filters[3], False, is_batchnorm)
-        self.up_concat3 = unetUp2(filters[3]*2, filters[2], False, is_batchnorm)
-        self.up_concat2 = unetUp2(filters[2]*2, filters[1], False, is_batchnorm)
-        self.up_concat1 = unetUp2(filters[1]*2, filters[0], False, is_batchnorm)
+        self.up_concat3 = unetUp2(filters[3], filters[2], False, is_batchnorm)
+        self.up_concat2 = unetUp2(filters[2], filters[1], False, is_batchnorm)
+        self.up_concat1 = unetUp2(filters[1], filters[0], False, is_batchnorm)
 
         # deep supervision
         self.dsv4 = UnetDsv2(in_size=filters[3], out_size=n_classes, scale_factor=8)

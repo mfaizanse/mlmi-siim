@@ -280,7 +280,7 @@ class UnetUp3(nn.Module):
 class unetUp2(nn.Module):
     def __init__(self, in_size, out_size, is_deconv, is_batchnorm=True):
         super(unetUp2, self).__init__()
-        self.conv = unetConv2(in_size, out_size, is_batchnorm)
+        self.conv = unetConv2(in_size + out_size, out_size, is_batchnorm)
         if is_deconv:
             self.up = nn.ConvTranspose2d(in_size, out_size, kernel_size=4, stride=2, padding=1)
         else:
@@ -293,9 +293,10 @@ class unetUp2(nn.Module):
 
     def forward(self, inputs1, inputs2):
         outputs2 = self.up(inputs2)
-        offset = outputs2.size()[1] - inputs1.size()[1]
-        padding = [0, 0, 0, 0, offset // 2, offset // 2]
-        outputs1 = F.pad(inputs1, padding)
+        # offset = outputs2.size()[1] - inputs1.size()[1]
+        # padding = [0, 0, 0, 0, offset // 2, offset // 2]
+        # outputs1 = F.pad(inputs1, padding)
+        outputs1 = inputs1
         cat = torch.cat([outputs1, outputs2], 1)
         return self.conv(cat)
 
