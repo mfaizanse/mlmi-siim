@@ -31,8 +31,9 @@ class FeedForwardSegmentation(BaseModel):
                                in_channels=opts.input_nc, nonlocal_mode=opts.nonlocal_mode,
                                tensor_dim=opts.tensor_dim, feature_scale=opts.feature_scale,
                                attention_dsample=opts.attention_dsample)
-        if self.use_cuda: self.net = self.net.cuda()
+        # if self.use_cuda: self.net = self.net.cuda()
 
+        self.net = self.net.to(self.device)
         self.net  = self.net.double()
 
         # load the model if a path is specified or it is in inference mode
@@ -76,20 +77,26 @@ class FeedForwardSegmentation(BaseModel):
             self.schedulers.append(get_scheduler(optimizer, train_opt))
             print('Scheduler is added for optimiser {0}'.format(optimizer))
 
-    def set_input(self, *inputs):
-        # self.input.resize_(inputs[0].size()).copy_(inputs[0])
-        for idx, _input in enumerate(inputs):
-            # If it's a 5D array and 2D model then (B x C x H x W x Z) -> (BZ x C x H x W)
-            bs = _input.size()
-            if (self.tensor_dim == '2D') and (len(bs) > 4):
-                _input = _input.permute(0,4,1,2,3).contiguous().view(bs[0]*bs[4], bs[1], bs[2], bs[3])
+    def set_input(self, input, target):
+        self.input = input.to(self.device)
+        self.target = target.to(self.device)
+        assert self.input.size() == self.target.size()
+                
 
-            # Define that it's a cuda array
-            if idx == 0:
-                self.input = _input.cuda() if self.use_cuda else _input
-            elif idx == 1:
-                self.target = Variable(_input.cuda()) if self.use_cuda else Variable(_input)
-                assert self.input.size() == self.target.size()
+    # def set_input(self, *inputs):
+    #     # self.input.resize_(inputs[0].size()).copy_(inputs[0])
+    #     for idx, _input in enumerate(inputs):
+    #         # If it's a 5D array and 2D model then (B x C x H x W x Z) -> (BZ x C x H x W)
+    #         bs = _input.size()
+    #         if (self.tensor_dim == '2D') and (len(bs) > 4):
+    #             _input = _input.permute(0,4,1,2,3).contiguous().view(bs[0]*bs[4], bs[1], bs[2], bs[3])
+
+    #         # Define that it's a cuda array
+    #         if idx == 0:
+    #             self.input = _input.cuda() if self.use_cuda else _input
+    #         elif idx == 1:
+    #             self.target = Variable(_input.cuda()) if self.use_cuda else Variable(_input)
+    #             assert self.input.size() == self.target.size()
 
     def forward(self, split):
         if split == 'train':
@@ -112,6 +119,7 @@ class FeedForwardSegmentation(BaseModel):
         self.forward(split='train')
 
         self.optimizer_S.zero_grad()
+        # self.net.zero_grad()
         self.backward()
         self.optimizer_S.step()
 

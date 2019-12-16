@@ -67,6 +67,7 @@ def train(json_opts):
             # Error visualisation
             errors = model.get_current_errors()
             error_logger.update(errors, split='train')
+            # cur_errors = error_logger.get_errors('train')
 
             print('Training loss at iter %d, epoch %d: %f \n' % (epoch_iter, epoch, errors['Seg_Loss']))
 
@@ -77,29 +78,29 @@ def train(json_opts):
             
             # visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
 
-            if Config.use_cuda:
-                model.delete_tensors()
-                torch.cuda.empty_cache()
+            # if Config.use_cuda:
+            #     model.delete_tensors()
+            #     torch.cuda.empty_cache()
 
-        for loader, split in zip([valid_loader], ['validation']):
-            for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
-                print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
+        # for loader, split in zip([valid_loader], ['validation']):
+        #     for epoch_iter, (images, labels) in tqdm(enumerate(loader, 1), total=len(loader)):
+        #         print('Val_Test: (epoch_iter %d, # iters: %d)' % (epoch_iter, len(loader)))
 
-                # Make a forward pass with the model
-                model.set_input(images, labels)
-                model.validate()
+        #         # Make a forward pass with the model
+        #         model.set_input(images, labels)
+        #         model.validate()
 
-                # Error visualisation
-                errors = model.get_current_errors()
-                stats = model.get_segmentation_stats()
-                error_logger.update({**errors, **stats}, split=split)
+        #         # Error visualisation
+        #         errors = model.get_current_errors()
+        #         stats = model.get_segmentation_stats()
+        #         error_logger.update({**errors, **stats}, split=split)
 
-                # Visualise predictions
-                # visuals = model.get_current_visuals()
-                # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
+        #         # Visualise predictions
+        #         # visuals = model.get_current_visuals()
+        #         # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
 
         # Update the plots
-        for split in ['train', 'validation']:
+        for split in ['train']:
             visualizer.plot_current_errors(epoch, error_logger.get_errors(split), split_name=split)
             visualizer.print_current_errors(epoch, error_logger.get_errors(split), split_name=split)
         error_logger.reset()

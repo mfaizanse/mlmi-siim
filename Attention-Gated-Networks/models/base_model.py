@@ -17,6 +17,18 @@ class BaseModel():
         self.gpu_ids = []
         self.which_epoch = int(0)
         self.path_pre_trained_model = None
+        
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda:0")
+            gpu_count = torch.cuda.device_count()
+            print("Available GPU count:" + str(gpu_count))
+            self.use_cuda = True
+        else:
+            self.device = torch.device("cpu")
+        
+        print("Using Device:")
+        print(self.device)
+            
 
     def name(self):
         return 'BaseModel'
@@ -24,8 +36,8 @@ class BaseModel():
     def initialize(self, opt, **kwargs):
         self.gpu_ids = opt.gpu_ids
         self.isTrain = opt.isTrain
-        self.ImgTensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
-        self.LblTensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
+        # self.ImgTensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
+        # self.LblTensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
         self.save_dir = opt.save_dir; mkdir(self.save_dir)
 
     def set_input(self, input):
