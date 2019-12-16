@@ -34,7 +34,7 @@ class FeedForwardSegmentation(BaseModel):
         # if self.use_cuda: self.net = self.net.cuda()
 
         self.net = self.net.to(self.device)
-        self.net  = self.net.double()
+        # self.net  = self.net.double()
 
         # load the model if a path is specified or it is in inference mode
         if not self.isTrain or opts.continue_train:
@@ -78,7 +78,7 @@ class FeedForwardSegmentation(BaseModel):
             print('Scheduler is added for optimiser {0}'.format(optimizer))
 
     def set_input(self, input, target):
-        self.input = input.to(self.device)
+        self.input = input.float().to(self.device)
         self.target = target.to(self.device)
         assert self.input.size() == self.target.size()
                 

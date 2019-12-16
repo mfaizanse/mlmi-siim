@@ -13,7 +13,7 @@ from config import Config
 import torch
 
 def train(json_opts):
-    print("Run 1:32")
+    print("Run 10")
     train_opts = json_opts.training
     Config.use_cuda = json_opts.use_cuda
     arch_type = train_opts.arch_type

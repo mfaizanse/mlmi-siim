@@ -74,7 +74,7 @@ class unet_simm(nn.Module):
         #     # inputs = inputs.to(dtype=torch.float64)
         #     inputs = inputs.double()
 
-        inputs = inputs.double()
+        # inputs = inputs.double()
 
         # Feature Extraction
         conv1 = self.conv1(inputs)
