@@ -33,7 +33,7 @@ class FeedForwardSegmentation(BaseModel):
                                attention_dsample=opts.attention_dsample)
         # if self.use_cuda: self.net = self.net.cuda()
 
-        self.net = self.net.to(self.device)
+        
         # self.net  = self.net.double()
 
         # load the model if a path is specified or it is in inference mode
@@ -46,6 +46,8 @@ class FeedForwardSegmentation(BaseModel):
                 self.which_epoch = opts.which_epoch
                 self.load_network(self.net, 'S', self.which_epoch)
 
+        self.net = self.net.to(self.device)
+
         # training objective
         if self.isTrain:
             self.criterion = get_criterion(opts)
@@ -55,7 +57,6 @@ class FeedForwardSegmentation(BaseModel):
             self.optimizer_S = get_optimizer(opts, self.net.parameters())
             self.optimizers.append(self.optimizer_S)
 
-            # print the network details
             # print the network details
             if kwargs.get('verbose', True):
                 print('Network is initialized')
@@ -69,7 +70,7 @@ class FeedForwardSegmentation(BaseModel):
 
     def hard_classification(self, input):
         input = input >= 0.5
-        input = input.double()
+        input = input.astype(int)
         return input
 
     def set_scheduler(self, train_opt):
@@ -78,8 +79,8 @@ class FeedForwardSegmentation(BaseModel):
             print('Scheduler is added for optimiser {0}'.format(optimizer))
 
     def set_input(self, input, target):
-        self.input = input.float().to(self.device)
-        self.target = target.to(self.device)
+        self.input = input.float()
+        self.target = target
         assert self.input.size() == self.target.size()
                 
 
@@ -100,8 +101,8 @@ class FeedForwardSegmentation(BaseModel):
 
     def forward(self, split):
         if split == 'train':
-            self.prediction = self.net(Variable(self.input))
-            self.hard_prediction = self.hard_classification(self.prediction)
+            self.prediction = self.net(Variable(self.input.to(self.device)))
+            # self.hard_prediction = self.hard_classification(self.prediction)
         elif split == 'test':
             with torch.no_grad():
                 self.prediction = self.net(Variable(self.input))
@@ -111,7 +112,7 @@ class FeedForwardSegmentation(BaseModel):
                 self.pred_seg = self.logits.data.max(1)[1].unsqueeze(1)
             
     def backward(self):
-        self.loss_S = self.criterion(self.prediction, self.target)
+        self.loss_S = self.criterion(self.prediction, self.target.to(self.device))
         self.loss_S.backward()
 
     def optimize_parameters(self):
@@ -144,15 +145,15 @@ class FeedForwardSegmentation(BaseModel):
         self.forward(split='test')
         self.loss_S = self.criterion(self.prediction, self.target)
 
-    def get_segmentation_stats(self):
-        self.seg_scores, self.dice_score = segmentation_stats(self.prediction, self.target)
-        seg_stats = [('Overall_Acc', self.seg_scores['overall_acc']), ('Mean_IOU', self.seg_scores['mean_iou'])]
-        for class_id in range(self.dice_score.size):
-            seg_stats.append(('Class_{}'.format(class_id), self.dice_score[class_id]))
-        return OrderedDict(seg_stats)
+    # def get_segmentation_stats(self):
+    #     self.seg_scores, self.dice_score = segmentation_stats(self.prediction, self.target)
+    #     seg_stats = [('Overall_Acc', self.seg_scores['overall_acc']), ('Mean_IOU', self.seg_scores['mean_iou'])]
+    #     for class_id in range(self.dice_score.size):
+    #         seg_stats.append(('Class_{}'.format(class_id), self.dice_score[class_id]))
+    #     return OrderedDict(seg_stats)
 
     def get_current_errors(self):
-        lossValue = self.loss_S.item()
+        lossValue = float(self.loss_S.item())
         # self.loss_S.data[0]
         return OrderedDict([
             ('Seg_Loss', lossValue)

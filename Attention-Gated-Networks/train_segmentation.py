@@ -71,10 +71,10 @@ def train(json_opts):
 
             print('Training loss at iter %d, epoch %d: %f \n' % (epoch_iter, epoch, errors['Seg_Loss']))
 
-            visuals = model.get_current_visuals_train()
+            # visuals = model.get_current_visuals_train()
             # visualizer.display_current_results(visuals, epoch=epoch, save_result=False)
             ## ('seg_pred', target_img), ('seg_target', input_img)
-            visualizer.display_image(visuals['vis_img'], 'training_prediction', 'train_pred')
+            # visualizer.display_image(visuals['vis_img'], 'training_prediction', 'train_pred')
             
             # visualizer.plot_current_errors(epoch, error_logger.get_errors('train'), split_name='train')
 
