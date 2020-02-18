@@ -1,0 +1,48 @@
+{
+  "use_cuda": false,
+  "network_debug": 0,
+  "training":{
+    "arch_type": "simm_unet",
+    "n_epochs": 30,
+    "save_epoch_freq": 10,
+    "lr_policy": "step",
+    "lr_decay_iters": 250,
+    "batchSize": 1,
+    "preloadData": true
+  },
+  "visualisation":{
+    "display_port": 6006,
+    "display_server": "http://54.89.248.230",
+    "no_html": true,
+    "display_winsize": 256,
+    "display_id": 1,
+    "display_single_pane_ncols": 0
+  },
+  "data_path": {
+    "simm_unet": "/Users/faizi/git/mlmi/input/siim",
+    "postfix": "/"
+  },
+  "augmentation": {
+  },
+  "model":{
+    "type":"seg",
+    "continue_train": false,
+    "which_epoch": -1,
+    "model_type": "unet_simm",
+    "tensor_dim": "2D",
+    "division_factor": 16,
+    "input_nc": 1,
+    "output_nc": 1,
+    "lr_rate": 1e-3,
+    "l2_reg_weight": 1e-6,
+    "feature_scale": 4,
+    "gpu_ids": [],
+    "isTrain": true,
+    "checkpoints_dir": "./checkpoints",
+    "experiment_name": "experiment_unet_simm",
+    "criterion": "SIMMSoftDiceLoss",
+    "optim": "adam"
+  }
+}
+
+
